@@ -22,6 +22,7 @@ USE_AOT_CACHE="${USE_AOT_CACHE:-true}"
 AUTH_MODE="${AUTH_MODE:-authenticated}"
 ACCEPT_EARLY_PLUGINS="${ACCEPT_EARLY_PLUGINS:-false}"
 MAX_MEMORY="${MAX_MEMORY:-8192}"
+AUTH_SELECT_PROFILE="${AUTH_SELECT_PROFILE:-1}"
 
 # Check if HytaleServer.jar exists
 SERVER_JAR="$SERVER_FILES/Server/HytaleServer.jar"
@@ -113,7 +114,13 @@ exec 3>"$FIFO"
                 echo "/auth login device" >&3
                 LogSuccess "Sent auth command to server"
             fi
-            
+
+            if echo "$line" | grep -q "Multiple profiles available"; then
+                sleep 1
+                echo "/auth select $AUTH_SELECT_PROFILE" >&3
+                LogSuccess "Selected profile $AUTH_SELECT_PROFILE"
+            fi
+
             if echo "$line" | grep -qE "Authentication successful!|Server is already authenticated."; then
                 sleep 1
                 echo "/auth persistence Encrypted" >&3
